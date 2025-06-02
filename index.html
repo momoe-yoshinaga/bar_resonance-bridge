@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cocktail Card - Bar RESONANCE & BRIDGE</title>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Noto+Serif+JP:wght@300;400;600&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Serif JP', serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #f5f5f5;
+            position: relative; /* For absolute positioning of the button */
+        }
+        
+        .card-container {
+            position: relative;
+            width: 400px;
+            height: 600px;
+            perspective: 1000px;
+        }
+        
+        .card {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+        
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+        
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7);
+            overflow: hidden;
+        }
+        
+        /* Front of card */
+        .card-front {
+            background: linear-gradient(145deg, #2a2a3a 0%, #16213e 100%);
+            border: 2px solid rgba(212, 175, 55, 0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 30px;
+        }
+        
+        .bar-logo {
+            font-family: 'Cinzel', serif;
+            font-size: 18px;
+            font-weight: 600;
+            color: #d4af37;
+            text-align: center;
+            margin-bottom: 30px;
+            letter-spacing: 2px;
+        }
+        
+        .cocktail-image-container {
+            width: 280px;
+            height: 280px;
+            margin: 20px 0;
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .cocktail-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(0.9) contrast(1.1);
+        }
+        
+        .cocktail-name {
+            font-family: 'Cinzel', serif;
+            font-size: 32px;
+            font-weight: 600;
+            color: #f5f5f5;
+            text-align: center;
+            margin-top: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .cocktail-subtitle {
+            font-size: 16px;
+            color: #d4af37;
+            text-align: center;
+            margin-top: 10px;
+            font-style: italic;
+        }
+        
+        .flip-hint {
+            position: absolute;
+            bottom: 30px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.4);
+            text-align: center;
+            width: 100%;
+        }
+        
+        /* Back of card */
+        .card-back {
+            background: linear-gradient(145deg, #1a1a2e 0%, #0f3460 100%);
+            border: 2px solid rgba(212, 175, 55, 0.3);
+            transform: rotateY(180deg);
+            padding: 30px 25px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            overflow-y: auto;
+        }
+        
+        .section {
+            margin-bottom: 20px;
+        }
+        
+        .section-title {
+            font-family: 'Cinzel', serif;
+            font-size: 16px;
+            color: #d4af37;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-title::before,
+        .section-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #d4af37, transparent);
+        }
+        
+        .recipe-list {
+            list-style: none;
+            padding-left: 15px;
+        }
+        
+        .recipe-list li {
+            margin-bottom: 3px;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.9);
+            position: relative;
+        }
+        
+        .recipe-list li::before {
+            content: '◆';
+            position: absolute;
+            left: -12px;
+            color: #d4af37;
+            font-size: 8px;
+        }
+        
+        .bartender-message {
+            font-size: 13px;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.9);
+            text-align: left;
+            padding: 12px;
+            border-left: 3px solid #d4af37;
+            background: rgba(212, 175, 55, 0.05);
+            margin-bottom: 10px; /* Added margin for the button */
+        }
+        
+        .trivia-text {
+            font-size: 12px;
+            line-height: 1.5;
+            color: rgba(255, 255, 255, 0.8);
+            text-align: justify;
+        }
+        
+        .sender-note {
+            text-align: right;
+            font-size: 12px;
+            color: #d4af37;
+            margin-top: 8px;
+            font-style: italic;
+        }
+        
+        /* Scrollbar styling */
+        .card-back::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .card-back::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .card-back::-webkit-scrollbar-thumb {
+            background: #d4af37;
+            border-radius: 2px;
+        }
+        
+        /* Decorative elements */
+        .corner-decoration {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border: 2px solid #d4af37;
+            opacity: 0.3;
+        }
+        
+        .corner-decoration.top-left {
+            top: 20px;
+            left: 20px;
+            border-right: none;
+            border-bottom: none;
+        }
+        
+        .corner-decoration.top-right {
+            top: 20px;
+            right: 20px;
+            border-left: none;
+            border-bottom: none;
+        }
+        
+        .corner-decoration.bottom-left {
+            bottom: 20px;
+            left: 20px;
+            border-right: none;
+            border-top: none;
+        }
+        
+        .corner-decoration.bottom-right {
+            bottom: 20px;
+            right: 20px;
+            border-left: none;
+            border-top: none;
+        }
+        
+        /* Glow effect on hover */
+        .card:hover .card-face {
+            box-shadow: 0 30px 60px rgba(212, 175, 55, 0.3);
+        }
+        
+        /* Instructions */
+        .instructions {
+            position: absolute;
+            bottom: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 14px;
+            width: 100%;
+        }
+
+        /* Download Button */
+        .download-button {
+            background-color: #d4af37;
+            color: #0a0a0a;
+            border: none;
+            border-radius: 9999px; /* 丸いデザイン */
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            position: absolute; /* Positioned absolutely */
+            right: 50px; /* Aligned to the right, increased value */
+            bottom: 50px; /* Aligned to the bottom, increased value */
+            font-weight: 600;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            z-index: 10; /* Ensure it's above other elements if necessary */
+            font-family: 'Cinzel', serif; /* フォントをCinzelに設定 */
+            text-transform: uppercase; /* 大文字にする */
+            letter-spacing: 1px; /* 文字間隔を調整 */
+            line-height: 1.2; /* 行の高さを調整して改行をきれいに見せる */
+        }
+
+        .download-button:hover {
+            background-color: #e0b84c;
+            transform: translateY(-2px);
+        }
+
+        .download-button:active {
+            background-color: #c29f2d;
+            transform: translateY(0);
+        }
+
+        /* Message Box for Alerts */
+        .message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #333;
+            color: #fff;
+            padding: 15px 30px;
+            border-radius: 10px;
+            z-index: 9999;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            font-size: 16px;
+            text-align: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .message-box.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body>
+    <div class="card-container">
+        <div class="card" onclick="flipCard()">
+            <div class="card-face card-front">
+                <div class="corner-decoration top-left"></div>
+                <div class="corner-decoration top-right"></div>
+                <div class="corner-decoration bottom-left"></div>
+                <div class="corner-decoration bottom-right"></div>
+                
+                <div class="bar-logo">Bar RESONANCE & BRIDGE</div>
+                
+                <div class="cocktail-image-container">
+                    <img class="cocktail-image" src="https://placehold.co/280x280/2a2a3a/d4af37?text=Martini" alt="Martini">
+                </div>
+                
+                <h1 class="cocktail-name">Martini</h1>
+                <p class="cocktail-subtitle">The King of Cocktails</p>
+                
+                <p class="flip-hint">タップしてカードをめくる</p>
+            </div>
+            
+            <div class="card-face card-back">
+                <div class="corner-decoration top-left"></div>
+                <div class="corner-decoration top-right"></div>
+                <div class="corner-decoration bottom-left"></div>
+                <div class="corner-decoration bottom-right"></div>
+                
+                <div class="section">
+                    <h2 class="section-title">Master's Message</h2>
+                    <p class="bartender-message" id="bartenderMessage">
+                        「お隣のお客様から」とお伝えするところですが、実は私からのささやかな贈り物です。今夜の素晴らしい対話に、心からの敬意を込めて。
+                    </p>
+                    <p class="sender-note">— マスター Medius —</p>
+                </div>
+                
+                <div class="section">
+                    <h2 class="section-title">Trivia</h2>
+                    <p class="trivia-text">
+                        <strong>1860年代</strong>にアメリカで誕生。<br><br>
+                        
+                        <strong>ジェームズ・ボンド</strong>の「ステアではなく、シェイクで」で世界的に有名に。<br><br>
+                        
+                        チャーチルは「完璧なマティーニは、ジンを注ぎながら隣の部屋のベルモットボトルを見つめるだけで良い」と語ったほど<strong>ジンの比率にこだわった</strong>逸話も。
+                    </p>
+                </div>
+                
+                <div class="section">
+                    <h2 class="section-title">Recipe</h2>
+                    <ul class="recipe-list">
+                        <li>ドライジン 50ml</li>
+                        <li>ドライベルモット 10ml</li>
+                        <li>オリーブ 1個（飾り）</li>
+                        <li>レモンピール（香り付け）</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <p class="instructions">クリックしてカードの詳細を見る</p>
+    </div>
+
+    <button class="download-button" onclick="downloadCardAsJPG()">Download<br>the Card</button>
+
+    <div id="messageBox" class="message-box"></div>
+    
+    <script>
+        // カクテルデータ
+        const cocktailData = {
+            "martini": {
+                "name": "Martini",
+                "subtitle": "The King of Cocktails",
+                "image": "https://placehold.co/280x280/2a2a3a/d4af37?text=Martini",
+                "triviaContent": "<strong>1860年代</strong>にアメリカで誕生し、カクテルの王様と呼ばれる。<br><br><strong>ジェームズ・ボンド</strong>の「ステアではなく、シェイクで」というセリフで世界的に有名に。<br><br>チャーチルは「完璧なマティーニは、ジンを注ぎながら隣の部屋のベルモットボトルを見つめるだけで良い」と語ったほど、<strong>究極のドライさ</strong>にこだわった逸話も残る。",
+                "recipe": ["ドライジン 50ml", "ドライベルモット 10ml", "オリーブ 1個（飾り）", "レモンピール（香り付け）"]
+            },
+            "margarita": {
+                "name": "Margarita",
+                "subtitle": "The Spirit of Mexico",
+                "image": "https://placehold.co/280x280/2a2a3a/d4af37?text=Margarita",
+                "triviaContent": "<strong>1938年</strong>、メキシコのバーテンダーが踊り子マルガリータのために創作した情熱的なカクテル。<br><br><strong>塩のリム</strong>が涙を表し、「無言の愛」というカクテル言葉を持つ。<br><br>テキーラベースの代表格として、<strong>世界中のビーチリゾート</strong>で太陽と共に楽しまれ、メキシコの魂を伝える一杯となった。",
+                "recipe": ["テキーラ 30ml", "ホワイトキュラソー 15ml", "ライムジュース 15ml", "塩（グラスの縁に）"]
+            },
+            "bloody_mary": {
+                "name": "Bloody Mary",
+                "subtitle": "The Morning Cure",
+                "image": "https://placehold.co/280x280/2a2a3a/d4af37?text=Bloody+Mary",
+                "triviaContent": "<strong>1920年代</strong>パリのハリーズバーで誕生した真紅のカクテル。<br><br>名前の由来は<strong>英国女王メアリー1世</strong>の血なまぐさい統治から。<br><br>「断ち切れない絆」という意味を持ち、<strong>二日酔いの特効薬</strong>として世界中で愛飲。朝食と共に楽しむ唯一のカクテルとしても有名。",
+                "recipe": ["ウォッカ 45ml", "トマトジュース 適量", "レモンジュース 15ml", "タバスコ・ウスターソース 各少々", "塩・胡椒 適量"]
+            },
+            "rusty_nail": {
+                "name": "Rusty Nail",
+                "subtitle": "The Scottish Harmony",
+                "image": "https://placehold.co/280x280/2a2a3a/d4af37?text=Rusty+Nail",
+                "triviaContent": "<strong>1960年代</strong>にスコットランドで生まれた比較的新しいカクテル。<br><br>名前は<strong>錆びた釘</strong>の色に由来し、見た目の渋さとは裏腹に甘美な味わい。<br><br>スコッチとドランブイの絶妙な調和が<strong>「人生の深み」</strong>を表現。ラットパックのメンバーが愛飲したことでも知られる。",
+                "recipe": ["スコッチウイスキー 40ml", "ドランブイ 20ml", "レモンピール（飾り）"]
+            },
+            "blue_moon": {
+                "name": "Blue Moon",
+                "subtitle": "The Mysterious Beauty",
+                "image": "https://placehold.co/280x280/2a2a3a/d4af37?text=Blue+Moon",
+                "triviaContent": "<strong>1940年代</strong>に誕生した幻想的な青紫色のカクテル。<br><br>「完全なる愛」を意味し、<strong>青い月のような希少性</strong>から名付けられた。<br><br>パルフェヴィオレットの独特な香りはスミレの花を思わせ、一度飲むと<strong>忘れられない印象</strong>を残す。禁断の恋を表現するとも言われる。",
+                "recipe": ["ジン 30ml", "パルフェヴィオレット 15ml", "レモンジュース 15ml"]
+            },
+            "mojito": {
+                "name": "Mojito",
+                "subtitle": "The Cuban Classic",
+                "image": "https://placehold.co/280x280/2a2a3a/d4af37?text=Mojito",
+                "triviaContent": "<strong>16世紀</strong>のキューバで海賊の薬酒「ドラケ」として誕生。<br><br><strong>ヘミングウェイ</strong>が「私のモヒートはラ・ボデギータで」と愛したカクテル。<br><br>ミントの爽やかさが<strong>「心の解放」</strong>を象徴し、カリブの風を感じさせる。キューバ革命の英雄たちも愛飲した自由の味。",
+                "recipe": ["ホワイトラム 45ml", "ライムジュース 20ml", "砂糖 2tsp", "ミントの葉 10枚程度", "ソーダ水 適量"]
+            },
+            "white_lady": {
+                "name": "White Lady",
+                "subtitle": "The Elegant Classic",
+                "image": "https://placehold.co/280x280/2a2a3a/d4af37?text=White+Lady",
+                "triviaContent": "<strong>1919年</strong>ロンドンのサヴォイホテルで、伝説のバーテンダー、ハリー・クラドックが創作。<br><br>「純心」を表すカクテル言葉を持ち、<strong>白いドレスの貴婦人</strong>をイメージ。<br><br>シンプルながら<strong>完璧なバランス</strong>は、まさにカクテルの教科書。多くのバーテンダーの登竜門となる一杯。",
+                "recipe": ["ジン 40ml", "ホワイトキュラソー 20ml", "レモンジュース 20ml"]
+            },
+            "mimosa": {
+                "name": "Mimosa",
+                "subtitle": "The Brunch Favorite",
+                "image": "https://placehold.co/280x280/2a2a3a/d4af37?text=Mimosa",
+                "triviaContent": "<strong>1925年</strong>パリのリッツホテルで、シャンパンの新しい楽しみ方として創作。<br><br>黄色い花<strong>ミモザ</strong>に似た美しい色合いから命名された。<br><br>「真心」を意味し、<strong>祝福の場</strong>で愛される華やかなカクテル。F1の表彰台でも振る舞われ、勝利の味として知られる。",
+                "recipe": ["シャンパン 90ml", "オレンジジュース 90ml"]
+            },
+            "gin_tonic": {
+                "name": "Gin & Tonic",
+                "subtitle": "The Colonial Classic",
+                "image": "https://placehold.co/280x280/2a2a3a/d4af37?text=Gin+Tonic",
+                "triviaContent": "<strong>19世紀</strong>英国領インドで、マラリア予防薬として誕生した実用的カクテル。<br><br>トニックウォーターの<strong>キニーネ</strong>が薬効成分だった歴史を持つ。<br><br>今では<strong>「強い意志」</strong>を表す、世界で最も愛されるロングドリンク。ジンの個性を引き立てる究極のシンプルさが魅力。",
+                "recipe": ["ジン 45ml", "トニックウォーター 適量", "ライム 1/8個"]
+            },
+            "xyz": {
+                "name": "X.Y.Z",
+                "subtitle": "The Final Word",
+                "image": "https://placehold.co/280x280/2a2a3a/d4af37?text=XYZ",
+                "triviaContent": "<strong>1920年代</strong>禁酒法時代のアメリカで、密造酒バーで生まれた。<br><br>名前は<strong>「もうこれで終わり」</strong>（eXamine Your Zipper）を意味する暗号。<br><br>「永遠の愛」というカクテル言葉を持ち、皮肉にも<strong>最後の一杯</strong>として愛される。アルファベット最後の文字が終わりを告げる。",
+                "recipe": ["ラム 30ml", "コアントロー 15ml", "レモンジュース 15ml"]
+            },
+            "champagne": {
+                "name": "Champagne",
+                "subtitle": "The Celebration Icon",
+                "image": "https://placehold.co/280x280/2a2a3a/d4af37?text=Champagne",
+                "triviaContent": "<strong>17世紀</strong>フランスの修道士ドン・ペリニヨンが瓶内二次発酵を完成させた。<br><br>「私は星を飲んでいる」という<strong>伝説の言葉</strong>を残したとされる。<br><br><strong>祝福と成功</strong>の象徴として、F1やオリンピックなど特別な瞬間を彩る。マリリン・モンローは靴磨きにも使ったという。",
+                "recipe": ["シャンパン 適量", "（そのまま、または各種リキュールを加えて）"]
+            },
+            "sauternes": {
+                "name": "Sauternes",
+                "subtitle": "The Noble Rot Wine",
+                "image": "https://placehold.co/280x280/2a2a3a/d4af37?text=Sauternes",
+                "triviaContent": "<strong>1847年</strong>収穫を遅らせた偶然から、貴腐菌により誕生した奇跡のワイン。<br><br><strong>「高貴なる腐敗」</strong>が生む黄金の雫は、ルイ14世に愛された。<br><br>「永遠の契り」を意味し、1本のブドウから盃一杯分しか作れない。フォアグラとの組み合わせは<strong>究極のマリアージュ</strong>と称される。",
+        "recipe": ["貴腐ワイン（ソーテルヌ）適量", "適温：8-10℃"]
+            },
+            "long_island_iced_tea": {
+                "name": "Long Island Iced Tea",
+                "subtitle": "The Deceptive Powerhouse",
+                "image": "https://placehold.co/280x280/2a2a3a/d4af37?text=Long+Island",
+                "triviaContent": "<strong>1970年代</strong>ニューヨーク州ロングアイランドで、若きバーテンダーが創作。<br><br>見た目は紅茶、中身は<strong>5種類のスピリッツ</strong>という危険な魅力。<br><br>「希望」という意外なカクテル言葉を持つが、アルコール度数は約25%。<strong>パーティーの定番</strong>ながら、1杯で十分という警告も。",
+                "recipe": ["ウォッカ 15ml", "ジン 15ml", "ラム 15ml", "テキーラ 15ml", "トリプルセック 15ml", "レモンジュース 30ml", "コーラ 適量"]
+            },
+            "old_fashioned": {
+                "name": "Old Fashioned",
+                "subtitle": "The Original Cocktail",
+                "image": "https://placehold.co/280x280/2a2a3a/d4af37?text=Old+Fashioned",
+                "triviaContent": "<strong>1880年代</strong>ケンタッキーで生まれた、カクテルの原型とされる一杯。<br><br>名前は<strong>「昔ながらの」</strong>作り方を求めた紳士の一言から生まれた。<br><br>「ひたむきな愛」を表し、ドン・ドレイパーが愛飲したことで再ブーム。角砂糖を潰す儀式が<strong>時間の贅沢</strong>を演出する。",
+                "recipe": ["バーボンウイスキー 60ml", "角砂糖 1個", "アンゴスチュラビターズ 2-3滴", "オレンジピール"]
+            },
+            "manhattan": {
+                "name": "Manhattan",
+                "subtitle": "The Queen of Cocktails",
+                "image": "https://placehold.co/280x280/2a2a3a/d4af37?text=Manhattan",
+                "triviaContent": "<strong>1870年代</strong>NYマンハッタンクラブで、チャーチルの母ジェニーが<strong>選挙祝賀会</strong>で振る舞った。<br><br>「切ない恋心」を意味し、<strong>カクテルの女王</strong>と呼ばれる気品を持つ。<br><br>甘口のスイート、辛口のドライ、その中間のパーフェクトという3つの顔を持ち、飲む人の心情を映し出す。",
+                "recipe": ["ライウイスキー 60ml", "スイートベルモット 30ml", "アンゴスチュラビターズ 1滴", "マラスキーノチェリー"]
+            },
+            "sidecar": {
+                "name": "Sidecar",
+                "subtitle": "The Parisian Classic",
+                "image": "https://placehold.co/280x280/2a2a3a/d4af37?text=Sidecar",
+                "triviaContent": "<strong>第一次大戦中</strong>パリのハリーズバーで、サイドカーで通った<strong>米軍大尉</strong>のために創作。<br><br>「いつも二人で」という意味を持ち、相棒への想いが込められている。<br><br>グラスの縁の砂糖は<strong>パリの夜の甘さ</strong>を表現。コニャックの芳醇さが戦争の苦さを忘れさせたという。",
+                "recipe": ["ブランデー 30ml", "ホワイトキュラソー 20ml", "レモンジュース 20ml", "砂糖（グラスの縁に）"]
+            },
+            "daiquiri": {
+                "name": "Daiquiri",
+                "subtitle": "The Cuban Treasure",
+                "image": "https://placehold.co/280x280/2a2a3a/d4af37?text=Daiquiri",
+                "triviaContent": "<strong>1896年</strong>キューバの鉱山町ダイキリで、アメリカ人技師が暑さしのぎに創作。<br><br><strong>ヘミングウェイ</strong>は砂糖抜きの「パパ・ダイキリ」を1日12杯も愛飲。<br><br>「希望」を表し、材料3つの<strong>シンプルな美しさ</strong>がバーテンダーの技量を試す。フローズンスタイルは1950年代の発明。",
+                "recipe": ["ホワイトラム 60ml", "ライムジュース 25ml", "砂糖 2tsp"]
+            },
+            "gimlet": {
+                "name": "Gimlet",
+                "subtitle": "The Naval Medicine",
+                "image": "https://placehold.co/280x280/2a2a3a/d4af37?text=Gimlet",
+                "triviaContent": "<strong>19世紀</strong>英国海軍で、壊血病予防のため軍医<strong>ギムレット</strong>が考案。<br><br>ライムジュースのビタミンCが船員の命を救った歴史を持つ。<br><br>「遠い人を想う」という意味は、長い航海で家族を想う船員の心を表す。レイモンド・チャンドラーの小説で<strong>「本物のギムレットはジンとローズライムジュース半々」</strong>と描写された。",
+                "recipe": ["ジン 60ml", "ライムジュース 20ml"]
+            },
+            "cosmopolitan": {
+                "name": "Cosmopolitan",
+                "subtitle": "The Modern Icon",
+                "image": "https://placehold.co/280x280/2a2a3a/d4af37?text=Cosmopolitan",
+                "triviaContent": "<strong>1980年代</strong>マイアミで誕生し、NYで洗練された現代的カクテル。<br><br>ドラマ<strong>『Sex and the City』</strong>のキャリーが愛飲し、世界的ブームに。<br><br>ピンクの色合いが<strong>都会的な女性</strong>の強さと美しさを象徴。「華麗」という意味を持ち、マティーニグラスで飲むスタイルがエレガンス。",
+                "recipe": ["ウォッカシトロン 40ml", "コアントロー 15ml", "クランベリージュース 30ml", "ライムジュース 15ml"]
+            },
+            "black_russian": {
+                "name": "Black Russian",
+                "subtitle": "The Cold War Classic",
+                "image": "https://placehold.co/280x280/2a2a3a/d4af37?text=Black+Russian",
+                "triviaContent": "<strong>1949年</strong>ブリュッセルで、アメリカ大使ペール・メスタのために創作。<br><br><strong>冷戦時代</strong>の東西緊張を表す黒いカクテルは、皮肉な外交の産物。<br><br>「終わりなき戦い」という重い意味を持つが、ウォッカとコーヒーリキュールの組み合わせは<strong>甘い和解</strong>のよう。生クリームを加えるとホワイトルシアンに。",
+                "recipe": ["ウォッカ 40ml", "カルーア 20ml"]
+            }
+        };
+
+        function flipCard() {
+            const card = document.querySelector('.card');
+            card.classList.toggle('flipped');
+        }
+        
+        // URLパラメータから情報を取得してカードを更新
+        function updateCardFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const key = urlParams.get('key') || 'martini'; // デフォルトはマティーニ
+            const message = urlParams.get('message');
+            
+            // カクテルデータを取得
+            const cocktail = cocktailData[key.toLowerCase()] || cocktailData['martini'];
+            
+            // カードの表面を更新
+            document.querySelector('.cocktail-image').src = cocktail.image;
+            document.querySelector('.cocktail-name').textContent = cocktail.name;
+            document.querySelector('.cocktail-subtitle').textContent = cocktail.subtitle;
+            
+            // カードの裏面を更新
+            document.querySelector('.trivia-text').innerHTML = cocktail.triviaContent;
+            
+            // レシピを更新
+            const recipeList = document.querySelector('.recipe-list');
+            recipeList.innerHTML = '';
+            cocktail.recipe.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = item;
+                recipeList.appendChild(li);
+            });
+            
+            // メッセージを更新
+            if (message) {
+                document.getElementById('bartenderMessage').textContent = decodeURIComponent(message);
+            }
+        }
+        
+        // ページ読み込み時にカードを更新
+        window.addEventListener('DOMContentLoaded', updateCardFromURL);
+        
+        // Add some particle effects for ambiance
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.style.position = 'fixed';
+            particle.style.width = '2px';
+            particle.style.height = '2px';
+            particle.style.background = '#d4af37';
+            particle.style.borderRadius = '50%';
+            particle.style.pointerEvents = 'none';
+            particle.style.opacity = Math.random();
+            particle.style.left = Math.random() * window.innerWidth + 'px';
+            particle.style.top = window.innerHeight + 'px';
+            
+            document.body.appendChild(particle);
+            
+            const duration = 3000 + Math.random() * 2000;
+            const horizontalMovement = (Math.random() - 0.5) * 100;
+            
+            const animation = particle.animate([
+                { transform: 'translate(0, 0)', opacity: parseFloat(particle.style.opacity) },
+                { transform: `translate(${horizontalMovement}px, -${window.innerHeight + 100}px)`, opacity: 0 }
+            ], {
+                duration: duration,
+                easing: 'linear'
+            });
+            
+            animation.onfinish = () => {
+                if (particle && particle.parentNode) {
+                    particle.parentNode.removeChild(particle);
+                }
+            };
+        }
+        
+        // Create particles periodically
+        setInterval(createParticle, 300);
+
+        // --- Message Box Function (replaces alert) ---
+        function showMessage(message, duration = 3000) {
+            const messageBox = document.getElementById('messageBox');
+            messageBox.textContent = message;
+            messageBox.classList.add('visible');
+            setTimeout(() => {
+                messageBox.classList.remove('visible');
+            }, duration);
+        }
+
+        // --- Download Card as JPG Function ---
+        async function downloadCardAsJPG() {
+            const cardFront = document.querySelector('.card-front');
+            const cardBack = document.querySelector('.card-back');
+            const cardContainer = document.querySelector('.card-container');
+
+            // Add a loading indicator
+            const downloadButton = document.querySelector('.download-button');
+            const originalButtonText = downloadButton.innerHTML; // innerHTMLを使用
+            downloadButton.innerHTML = 'Generating...'; // 英語のローディングテキスト
+            downloadButton.disabled = true;
+
+            // Create a temporary container off-screen to render both sides
+            const tempContainer = document.createElement('div');
+            tempContainer.style.position = 'absolute';
+            tempContainer.style.left = '-9999px'; // Move off-screen
+            tempContainer.style.top = '-9999px';
+            tempContainer.style.width = (cardContainer.offsetWidth * 2) + 'px'; // Double width for side-by-side
+            tempContainer.style.height = cardContainer.offsetHeight + 'px';
+            tempContainer.style.display = 'flex';
+            tempContainer.style.flexDirection = 'row';
+            tempContainer.style.gap = '0px'; // No gap between cards
+            document.body.appendChild(tempContainer);
+
+            // Clone the card faces and append to temp container
+            const clonedFront = cardFront.cloneNode(true);
+            const clonedBack = cardBack.cloneNode(true);
+
+            // Apply necessary styles to the cloned elements for capturing
+            clonedFront.style.position = 'static';
+            clonedFront.style.transform = 'none';
+            clonedFront.style.backfaceVisibility = 'visible';
+            clonedFront.style.width = cardContainer.offsetWidth + 'px';
+            clonedFront.style.height = cardContainer.offsetHeight + 'px';
+            clonedFront.style.boxShadow = 'none'; // Remove shadow for cleaner merge if desired
+
+            clonedBack.style.position = 'static';
+            clonedBack.style.transform = 'none'; // Ensure backface is not rotated
+            clonedBack.style.backfaceVisibility = 'visible';
+            clonedBack.style.width = cardContainer.offsetWidth + 'px';
+            clonedBack.style.height = cardContainer.offsetHeight + 'px';
+            clonedBack.style.boxShadow = 'none'; // Remove shadow for cleaner merge if desired
+
+            tempContainer.appendChild(clonedFront);
+            tempContainer.appendChild(clonedBack);
+
+            try {
+                // Capture the temporary container using html2canvas
+                const canvas = await html2canvas(tempContainer, {
+                    scale: 2, // Increase scale for better quality
+                    useCORS: true // Important for images loaded from external domains, but only if the server supports it
+                });
+
+                // Create a download link
+                const link = document.createElement('a');
+                link.href = canvas.toDataURL('image/jpeg', 0.9); // Convert to JPG with 90% quality
+                link.download = 'cocktail_card.jpg';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                showMessage('カードがJPGでダウンロードされました！');
+
+            } catch (error) {
+                console.error('Error generating image:', error);
+                showMessage('画像の生成に失敗しました。');
+            } finally {
+                // Clean up temporary elements
+                if (tempContainer.parentNode) {
+                    tempContainer.parentNode.removeChild(tempContainer);
+                }
+                downloadButton.innerHTML = originalButtonText; // innerHTMLに戻す
+                downloadButton.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
